@@ -18,7 +18,7 @@ namespace Soulfire.Bot.Commands
             _serviceProvider = serviceProvider;
         }
 
-        public async Task Execute(IChatService chatService, long chatId, int userId, int messageId, string? commandText)
+        public async Task Execute(IChatService chatService, long chatId, long userId, int messageId, string? commandText)
         {
             await chatService.SendMessage(chatId, "TODO: Create a todo command");
         }
