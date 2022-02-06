@@ -6,7 +6,7 @@ using Soulfire.Bot.Commands;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
-using Newtonsoft.Json;
+using Soulfire.Bot.Services;
 
 namespace Soulfire.Bot
 {

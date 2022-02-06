@@ -2,6 +2,7 @@
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Logging;
+using Soulfire.Bot.Services;
 
 namespace Soulfire.Bot
 {
@@ -25,6 +26,13 @@ namespace Soulfire.Bot
                 })
                 .ConfigureServices((hostContext, services) =>
                 {
+                    services.AddHttpClient("newsClient", x =>
+                    {
+                        x.BaseAddress = new System.Uri("https://newsapi.org/v2/");
+                    });
+
+                    services.AddScoped<NewsService>();
+
                     services.AddLogging();
                     services.AddSingleton<IChatService, TelegramService>();
                     services.AddBotCommands();

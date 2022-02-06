@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Soulfire.Bot.Services;
+using System;
 using System.Threading.Tasks;
 
 namespace Soulfire.Bot.Commands

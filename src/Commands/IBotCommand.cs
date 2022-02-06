@@ -1,3 +1,4 @@
+using Soulfire.Bot.Services;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 

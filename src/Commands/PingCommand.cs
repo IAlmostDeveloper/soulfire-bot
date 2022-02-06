@@ -1,3 +1,4 @@
+using Soulfire.Bot.Services;
 using System.Threading.Tasks;
 
 namespace Soulfire.Bot.Commands

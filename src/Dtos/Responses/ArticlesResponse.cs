@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
 namespace Soulfire.Bot.Dtos.Responses
 {
@@ -10,6 +6,6 @@ namespace Soulfire.Bot.Dtos.Responses
     {
         public string Status { get; set; }
         public int TotalResults { get; set; }
-        public IEnumerable<Article> Articles { get; set; }
+        public List<Article> Articles { get; set; }
     }
 }
