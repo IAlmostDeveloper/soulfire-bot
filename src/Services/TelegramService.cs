@@ -11,6 +11,7 @@ using Telegram.Bot.Args;
 using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
+using Soulfire.Bot.Core.InlineButtons;
 
 namespace Soulfire.Bot.Services
 {
@@ -105,7 +106,7 @@ namespace Soulfire.Bot.Services
             }
         }
 
-        public async Task<bool> UpdateMessage(long chatId, int messageId, string? newText, Dictionary<string, string>? buttons = null)
+        public async Task<bool> UpdateMessage(long chatId, int messageId, string? newText, IEnumerable<IEnumerable<InlineButton>>? buttons = null)
         {
             try
             {
@@ -123,22 +124,43 @@ namespace Soulfire.Bot.Services
             }
         }
 
-        private InlineKeyboardMarkup? GetInlineKeyboard(Dictionary<string, string>? buttons)
+        private InlineKeyboardMarkup? GetInlineKeyboard(IEnumerable<IEnumerable<InlineButton>>? buttons)
         {
             InlineKeyboardMarkup? inlineKeyboard = null;
             if (buttons != null)
             {
-                var inlineKeyboardButtons = new List<InlineKeyboardButton>();
-                foreach (var button in buttons)
+                var inlineKeyboardButtons = new List<List<InlineKeyboardButton>>();
+                foreach (var buttonsLine in buttons)
                 {
-                    inlineKeyboardButtons.Add(InlineKeyboardButton.WithCallbackData(button.Key, button.Value));
+                    var inlineButtonsLine = new List<InlineKeyboardButton>();
+                    foreach (var button in buttonsLine)
+                    {
+                        switch (button.Type)
+                        {
+                            case Core.Enumerations.InlineButtonType.Callback:
+                                inlineButtonsLine.Add(InlineKeyboardButton.WithCallbackData(button.Label, button.Value));
+                                break;
+                            case Core.Enumerations.InlineButtonType.Url:
+                                inlineButtonsLine.Add(InlineKeyboardButton.WithUrl(button.Label, button.Value));
+                                break;
+                            case Core.Enumerations.InlineButtonType.SwitchToInlineQuery:
+                                inlineButtonsLine.Add(InlineKeyboardButton.WithSwitchInlineQuery(button.Label, button.Value));
+                                break;
+                            case Core.Enumerations.InlineButtonType.SwitchToInlineQueryCurrentChat:
+                                inlineButtonsLine.Add(InlineKeyboardButton.WithSwitchInlineQueryCurrentChat(button.Label, button.Value));
+                                break;
+                            default:
+                                break;
+                        }
+                    }
+                    inlineKeyboardButtons.Add(inlineButtonsLine);
                 }
                 inlineKeyboard = new InlineKeyboardMarkup(inlineKeyboardButtons);
             }
             return inlineKeyboard;
         }
 
-        public async Task<bool> SendMessage(long chatId, string? message, Dictionary<string, string>? buttons = null)
+        public async Task<bool> SendMessage(long chatId, string? message, IEnumerable<IEnumerable<InlineButton>>? buttons = null)
         {
             try
             {
