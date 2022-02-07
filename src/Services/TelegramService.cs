@@ -123,8 +123,8 @@ namespace Soulfire.Bot.Services
                     Id = Guid.NewGuid().ToString(),
                     Title = x.Title,
                     Description = x.Description,
-                    InputMessageContent = EscapeText(
-                    x.Description != null ? x.Description :
+                    InputMessageContent = string.Format("{0}\n<a href=\"{1}\">{1}</a>",
+                    x.Description != null ? x.Description : x.Title,
                     x.Url),
                     ThumbUrl = x.UrlToImage
                 };
@@ -155,7 +155,10 @@ namespace Soulfire.Bot.Services
             var queryResult = new List<InlineQueryResultArticle>();
             foreach (var articleDto in articleDtos)
             {
-                var article = new InlineQueryResultArticle(articleDto.Id, articleDto.Title, new InputTextMessageContent(articleDto.InputMessageContent));
+                var article = new InlineQueryResultArticle(articleDto.Id, articleDto.Title, new InputTextMessageContent(articleDto.InputMessageContent)
+                {
+                    ParseMode = ParseMode.Html
+                });
                 article.Description = articleDto.Description;
                 if (articleDto.ThumbUrl != null)
                     article.ThumbUrl = articleDto.ThumbUrl;
