@@ -14,6 +14,7 @@ using Telegram.Bot.Types.ReplyMarkups;
 using Soulfire.Bot.Core.InlineButtons;
 using Telegram.Bot.Types.InlineQueryResults;
 using Soulfire.Bot.Dtos;
+using System.Text.RegularExpressions;
 
 namespace Soulfire.Bot.Services
 {
@@ -121,10 +122,10 @@ namespace Soulfire.Bot.Services
                 return new InlineQueryResultArticleDto()
                 {
                     Id = Guid.NewGuid().ToString(),
-                    Title = x.Title,
-                    Description = x.Description,
+                    Title = EscapeText(x.Title),
+                    Description = EscapeText(x.Description),
                     InputMessageContent = string.Format("{0}\n<a href=\"{1}\">{1}</a>",
-                    x.Description != null ? x.Description : x.Title,
+                    EscapeText(x.Description != null ? x.Description : x.Title),
                     x.Url),
                     ThumbUrl = x.UrlToImage
                 };
@@ -231,7 +232,10 @@ namespace Soulfire.Bot.Services
 
         private string EscapeText(string? source)
         {
-            var charactersToEscape = new[] { "_", "*", "[", "]", "(", ")", "~", "`", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!" };
+            var regex = new Regex(@"<(\w*|\/\w*)>");
+            source = regex.Replace(source, string.Empty);
+
+            var charactersToEscape = new[] { "_", "*", "[", "]", "(", ")", "~", "`","<", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!" };
             foreach (var item in charactersToEscape)
             {
                 source = source.Replace(item, $@"\{item}");
