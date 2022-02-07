@@ -12,6 +12,7 @@ using Telegram.Bot.Types;
 using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Soulfire.Bot.Core.InlineButtons;
+using Telegram.Bot.Types.InlineQueryResults;
 
 namespace Soulfire.Bot.Services
 {
@@ -24,16 +25,20 @@ namespace Soulfire.Bot.Services
         public event EventHandler<ChatMessageEventArgs>? ChatMessage;
         public event EventHandler<CallbackEventArgs>? Callback;
 
+        private readonly NewsService _newsService;
+
         public async Task<string> BotUserName() => $"@{(await _botClient.GetMeAsync()).Username}";
 
-        public TelegramService(IConfiguration configuration, IServiceProvider serviceProvider, ILogger<TelegramService> logger)
+        public TelegramService(IConfiguration configuration, IServiceProvider serviceProvider, ILogger<TelegramService> logger, NewsService newsService)
         {
+            _newsService = newsService;
             _serviceProvider = serviceProvider;
             _logger = logger;
             var apikey = configuration["Telegram:ApiKey"];
             _botClient = new TelegramBotClient(apikey);
             _botClient.OnMessage += OnMessage;
             _botClient.OnCallbackQuery += OnCallbackQuery;
+            _botClient.OnInlineQuery += OnInlineQuery;
             RegisterCommands();
             _botClient.StartReceiving();
         }
@@ -106,6 +111,13 @@ namespace Soulfire.Bot.Services
             }
         }
 
+        public async void OnInlineQuery(object? sender, InlineQueryEventArgs e)
+        {
+            _logger.LogTrace("Inline query received from '{Username}': '{Message}'", e.InlineQuery.From.Username ?? e.InlineQuery.From.FirstName, e.InlineQuery.Query);
+            var results = GetInlineQueryResults();
+            await _botClient.AnswerInlineQueryAsync(e.InlineQuery.Id, results);
+        }
+
         public async Task<bool> UpdateMessage(long chatId, int messageId, string? newText, IEnumerable<IEnumerable<InlineButton>>? buttons = null)
         {
             try
@@ -122,6 +134,16 @@ namespace Soulfire.Bot.Services
                 _logger.LogError(ex, "Error while updating message");
                 return false;
             }
+        }
+
+        private IEnumerable<InlineQueryResultBase> GetInlineQueryResults()
+        {
+            var queryResult = new List<InlineQueryResultArticle>()
+            {
+                new InlineQueryResultArticle("Query", "Query", new InputTextMessageContent("Description text here"))
+            };
+
+            return queryResult;
         }
 
         private InlineKeyboardMarkup? GetInlineKeyboard(IEnumerable<IEnumerable<InlineButton>>? buttons)
