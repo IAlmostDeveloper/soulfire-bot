@@ -24,6 +24,7 @@ namespace Soulfire.Bot.Services
             builder.Port = -1;
             var query = HttpUtility.ParseQueryString(builder.Query);
             query["country"] = "ru";
+            query["sortBy"] = "publishedAt";
             query["apiKey"] = _apiKey;
             builder.Query = query.ToString();
             string url = builder.ToString();
@@ -33,6 +34,23 @@ namespace Soulfire.Bot.Services
             string responseBody = await response.Content.ReadAsStringAsync();
             var result = JsonConvert.DeserializeObject<ArticlesResponse>(responseBody);
             return result;
+        }
+
+        public async Task<ArticlesResponse> GetArticlesByKeyword(string word)
+        {
+            var builder = new UriBuilder(_httpClient.BaseAddress + "everything");
+            builder.Port = -1;
+            var query = HttpUtility.ParseQueryString(builder.Query);
+            query["q"] = word;
+            query["sortBy"] = "publishedAt";
+            query["apiKey"] = _apiKey;
+            builder.Query = query.ToString();
+            string url = builder.ToString();
+
+            var response = await _httpClient.GetAsync(url);
+            response.EnsureSuccessStatusCode();
+            var responseBody = await response.Content.ReadAsStringAsync();
+            return JsonConvert.DeserializeObject<ArticlesResponse>(responseBody);
         }
     }
 }

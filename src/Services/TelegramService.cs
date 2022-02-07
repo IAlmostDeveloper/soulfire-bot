@@ -13,6 +13,7 @@ using Telegram.Bot.Types.Enums;
 using Telegram.Bot.Types.ReplyMarkups;
 using Soulfire.Bot.Core.InlineButtons;
 using Telegram.Bot.Types.InlineQueryResults;
+using Soulfire.Bot.Dtos;
 
 namespace Soulfire.Bot.Services
 {
@@ -114,7 +115,20 @@ namespace Soulfire.Bot.Services
         public async void OnInlineQuery(object? sender, InlineQueryEventArgs e)
         {
             _logger.LogTrace("Inline query received from '{Username}': '{Message}'", e.InlineQuery.From.Username ?? e.InlineQuery.From.FirstName, e.InlineQuery.Query);
-            var results = GetInlineQueryResults();
+            var articles = !string.IsNullOrWhiteSpace(e.InlineQuery.Query) ? await _newsService.GetArticlesByKeyword(e.InlineQuery.Query) : await _newsService.GetTopHeadlines();
+            var results = GetInlineQueryResults(articles.Articles.Select(x =>
+            {
+                return new InlineQueryResultArticleDto()
+                {
+                    Id = Guid.NewGuid().ToString(),
+                    Title = x.Title,
+                    Description = x.Description,
+                    InputMessageContent = EscapeText(
+                    x.Description != null ? x.Description :
+                    x.Url),
+                    ThumbUrl = x.UrlToImage
+                };
+            }));
             await _botClient.AnswerInlineQueryAsync(e.InlineQuery.Id, results);
         }
 
@@ -136,12 +150,18 @@ namespace Soulfire.Bot.Services
             }
         }
 
-        private IEnumerable<InlineQueryResultBase> GetInlineQueryResults()
+        private IEnumerable<InlineQueryResultBase> GetInlineQueryResults(IEnumerable<InlineQueryResultArticleDto> articleDtos)
         {
-            var queryResult = new List<InlineQueryResultArticle>()
+            var queryResult = new List<InlineQueryResultArticle>();
+            foreach (var articleDto in articleDtos)
             {
-                new InlineQueryResultArticle("Query", "Query", new InputTextMessageContent("Description text here"))
-            };
+                var article = new InlineQueryResultArticle(articleDto.Id, articleDto.Title, new InputTextMessageContent(articleDto.InputMessageContent));
+                article.Description = articleDto.Description;
+                if (articleDto.ThumbUrl != null)
+                    article.ThumbUrl = articleDto.ThumbUrl;
+
+                queryResult.Add(article);
+            }
 
             return queryResult;
         }
