@@ -232,13 +232,16 @@ namespace Soulfire.Bot.Services
 
         private string EscapeText(string? source)
         {
-            var regex = new Regex(@"<(\w*|\/\w*)>");
-            source = regex.Replace(source, string.Empty);
-
-            var charactersToEscape = new[] { "_", "*", "[", "]", "(", ")", "~", "`","<", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!" };
-            foreach (var item in charactersToEscape)
+            if (source != null)
             {
-                source = source.Replace(item, $@"\{item}");
+                var regex = new Regex(@"<(\w*|\/\w*)>");
+                source = regex.Replace(source, string.Empty);
+
+                var charactersToEscape = new[] { "_", "*", "[", "]", "(", ")", "~", "`","<", ">", "#", "+", "-", "=", "|", "{", "}", ".", "!" };
+                foreach (var item in charactersToEscape)
+                {
+                    source = source.Replace(item, $@"\{item}");
+                }
             }
             return source;
         }
