@@ -10,18 +10,18 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-      - name: Create SSH key
-        run: |
-          mkdir -p ~/.ssh/
-          echo "$BOT_DEPLOY_KEY" > ../private.key
-          sudo chmod 600 ../private.key
-          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
-        shell: bash
-        env:
-          BOT_DEPLOY_KEY: ${{secrets.BOT_DEPLOY_KEY}}
-          BOT_DEPLOY_USER: ${{secrets.BOT_DEPLOY_USER}}
-          BOT_DEPLOY_HOST: ${{secrets.BOT_DEPLOY_HOST}}
-          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
-          SSH_KEY_PATH: ${{ github.workspace }}/../private.key
-      - name: Run deploy script on VM
-        run: ssh -i $SSH_KEY_PATH $BOT_DEPLOY_USER@$BOT_DEPLOY_HOST deploy_bot
+      - name: SSH Command
+        # You may pin to the exact commit or the version.
+        # uses: D3rHase/ssh-command-action@3d8a11a6823dfe94f4fae068e6fc8b8f3d038c62
+        uses: D3rHase/ssh-command-action@v0.2
+        with:
+          # hostname / IP of the server
+          HOST: ${{secrets.BOT_DEPLOY_HOST}}
+          # ssh port of the server
+          PORT: 22
+          # user of the server
+          USER: ${{BOT_DEPLOY_USER}}
+          # private ssh key registered on the server
+          PRIVATE_SSH_KEY: ${{secrets.BOT_DEPLOY_KEY}}
+          # command to be executed
+          COMMAND: deploy_bot
