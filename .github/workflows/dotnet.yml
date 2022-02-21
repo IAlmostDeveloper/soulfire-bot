@@ -20,7 +20,7 @@ jobs:
           # ssh port of the server
           PORT: 22
           # user of the server
-          USER: ${{BOT_DEPLOY_USER}}
+          USER: ${{secrets.BOT_DEPLOY_USER}}
           # private ssh key registered on the server
           PRIVATE_SSH_KEY: ${{secrets.BOT_DEPLOY_KEY}}
           # command to be executed
