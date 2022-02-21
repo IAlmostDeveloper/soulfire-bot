@@ -8,18 +8,20 @@ on:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
-
     steps:
-    - uses: actions/checkout@v2
-    - name: Setup .NET
-      uses: actions/setup-dotnet@v1
-      with:
-        dotnet-version: 5.0.x
-    - name: Restore dependencies
-      run: dotnet restore
-    - name: Build
-      run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
+      - name: Create SSH key
+        run: |
+          mkdir -p ~/.ssh/
+          echo "$BOT_DEPLOY_KEY" > ../private.key
+          sudo chmod 600 ../private.key
+          echo "$SSH_KNOWN_HOSTS" > ~/.ssh/known_hosts
+        shell: bash
+        env:
+          BOT_DEPLOY_KEY: ${{secrets.BOT_DEPLOY_KEY}}
+          BOT_DEPLOY_USER: ${{secrets.BOT_DEPLOY_USER}}
+          BOT_DEPLOY_HOST: ${{secrets.BOT_DEPLOY_HOST}}
+          SSH_KNOWN_HOSTS: ${{secrets.SSH_KNOWN_HOSTS}}
+          SSH_KEY_PATH: ${{ github.workspace }}/../private.key
+      - name: Run deploy script on VM
+        run: ssh -i $SSH_KEY_PATH $BOT_DEPLOY_USER@$BOT_DEPLOY_HOST deploy_bot
